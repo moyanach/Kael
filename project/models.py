@@ -7,7 +7,7 @@ from utils.tools import generate_instance_id
 
 class BusinessesModel(models.Model):
     instance = models.CharField(
-        max_length=32,
+        max_length=64,
         verbose_name="实例ID",
         unique=True,
         null=False,
@@ -16,7 +16,7 @@ class BusinessesModel(models.Model):
     name = models.CharField(max_length=32, verbose_name="业务线名称")
     label = models.CharField(max_length=32, verbose_name="业务线别名")
     platform = models.CharField(
-        max_length=32, verbose_name="业务线平台", choices=plaform_type
+        max_length=32, verbose_name="业务线平台", choices=platform_type
     )
     description = models.CharField(
         max_length=255, verbose_name="业务线描述", default=""
@@ -29,12 +29,12 @@ class BusinessesModel(models.Model):
         db_table = "apps_business"
 
     def __str__(self) -> str:
-        return self.instance
+        return self.name
 
 
 class ProductsModel(models.Model):
     instance = models.CharField(
-        max_length=32,
+        max_length=64,
         verbose_name="实例ID",
         unique=True,
         null=False,
@@ -63,7 +63,7 @@ class ProductsModel(models.Model):
 
 class ApplicationModel(models.Model):
     instance = models.CharField(
-        max_length=32,
+        max_length=64,
         verbose_name="实例ID",
         unique=True,
         null=False,

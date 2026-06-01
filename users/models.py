@@ -5,13 +5,13 @@ from utils.tools import generate_instance_id
 
 class UsersModel(models.Model):
     instance = models.CharField(
-        max_length=32,
+        max_length=64,
         verbose_name="实例ID",
         unique=True,
         null=False,
         default=generate_instance_id,
     )
-    username = models.CharField(max_length=32, verbose_name="用户名")
+    username = models.CharField(max_length=32, verbose_name="用户名", unique=True)
     nickname = models.CharField(max_length=32, verbose_name="花名")
     name = models.CharField(max_length=32, verbose_name="真名", blank=True, default="")
     email = models.CharField(
@@ -25,3 +25,6 @@ class UsersModel(models.Model):
 
     class Meta:
         db_table = "users_user"
+
+    def __str__(self) -> str:
+        return self.username

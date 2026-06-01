@@ -1,4 +1,6 @@
-from django_redis import get_redis_connection
+from django.core.cache import caches
 
 
-cache = get_redis_connection()
+def get_cache():
+    """Lazy access to the default cache to avoid startup failures."""
+    return caches['default']

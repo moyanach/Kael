@@ -18,7 +18,7 @@ class SyncUserInfo(SyncBaseInfo):
     def __init__(self) -> None:
         super(SyncUserInfo, self).__init__()
 
-    def sync_users(self) -> list[dict]:
+    def sync_users(self) -> list:
         api = "/api/cmdb/user/v2/user/"
         url = self.generate_url(api)
         total, pages = self.query_records_total(api)
@@ -30,39 +30,48 @@ class SyncUserInfo(SyncBaseInfo):
                 url,
                 headers=self.headers(),
                 params={"page": page, "size": self.page_size},
+                timeout=30,
             )
             try:
                 results = response.json()
                 records.extend(results.get("results", []))
-            except Exception as err:
-                pass
-        print(records[0:1])
-        print(len(records))
+            except requests.RequestException as err:
+                print(f"Error syncing users page {page}: {err}")
         return records
 
     def save_data(self):
-        reocrds = self.sync_users()
-        new_rows = []
-        for item in reocrds:
-            item["instance"] = item["instance_id"]
-            del item["instance_id"]
-            if "organization_id" not in item:
-                continue
-            del item["organization_id"]
-            user_obj = UsersModel(**item)
+        """Sync and save user records. Combined validation + save in one loop."""
+        records = self.sync_users()
+        saved_count = 0
+        error_count = 0
+        for item in records:
             try:
-                user_obj.full_clean()
-                new_rows.append(user_obj)
+                if "organization_id" not in item:
+                    continue
+
+                item["instance"] = item["instance_id"]
+                del item["instance_id"]
+                del item["organization_id"]
+
+                obj, created = UsersModel.objects.update_or_create(
+                    instance=item["instance"],
+                    defaults={
+                        "username": item.get("username", ""),
+                        "nickname": item.get("nickname", ""),
+                        "name": item.get("name", ""),
+                        "email": item.get("email", ""),
+                        "phone": item.get("phone", ""),
+                        "sex": item.get("sex", 1),
+                        "is_delete": item.get("is_delete", False),
+                    }
+                )
+                if created:
+                    saved_count += 1
             except Exception as err:
-                print(item)
-        print("valid complate")
-        for row in new_rows:
-            # del item['instance_id']
-            # if 'organization_id' not in item:
-            #     continue
-            # del item['organization_id']
-            # user_obj = UsersModel(**item)
-            row.save()
+                error_count += 1
+                print(f"Error saving user {item.get('instance', 'unknown')}: {err}")
+
+        print(f"User sync complete: {saved_count} created/updated, {error_count} errors")
 
 
 if __name__ == "__main__":

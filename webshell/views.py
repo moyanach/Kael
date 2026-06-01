@@ -3,6 +3,8 @@
 import json
 
 from channels.generic.websocket import WebsocketConsumer
+from channels.db import database_sync_to_async
+from django.contrib.auth.models import User
 
 from webshell.utils import K8SStreamThread, K8SApiTools
 
@@ -10,25 +12,71 @@ from webshell.utils import K8SStreamThread, K8SApiTools
 class SSHConsumer(WebsocketConsumer):
 
     def connect(self):
-        self.name = self.scope["url_route"]["kwargs"]
-        print('xxxx', self.scope)
+        # Extract parameters from query string
+        query_string = self.scope.get('query_string', b'').decode()
+        params = {}
+        if query_string:
+            for param in query_string.split('&'):
+                if '=' in param:
+                    key, value = param.split('=', 1)
+                    params[key] = value
 
-        # kube exec
-        self.stream = K8SApiTools(rw=True).create_attatch_pod_exec_stream()
-        kub_stream = K8SStreamThread(self, self.stream)
-        kub_stream.start()
-        self.accept()
+        # Required parameters for targeting a pod
+        self.namespace = params.get('namespace', 'default')
+        self.pod_name = params.get('pod_name', '')
+        self.container = params.get('container', '')
+
+        if not self.pod_name:
+            self.close(code=4001)
+            return
+
+        # TODO: Add authentication here. For example, validate a token from query params.
+        # token = params.get('token', '')
+        # if not self._validate_token(token):
+        #     self.close(code=4003)
+        #     return
+
+        try:
+            # Create K8s exec stream with dynamic pod params
+            k8s_tools = K8SApiTools(rw=True)
+            self.stream = k8s_tools.create_attatch_pod_exec_stream(
+                namespace=self.namespace,
+                pod_name=self.pod_name,
+                container=self.container or self.pod_name,
+            )
+            kub_stream = K8SStreamThread(self, self.stream)
+            kub_stream.start()
+            self.accept()
+        except Exception as err:
+            self.close(code=4002)
 
     def disconnect(self, close_code):
-        self.stream.write_stdin('exit\r')
+        if hasattr(self, 'stream') and self.stream:
+            try:
+                self.stream.write_stdin('exit\r')
+            except Exception:
+                pass
 
     def receive(self, text_data):
-        text_data = json.loads(text_data)
+        try:
+            text_data = json.loads(text_data)
+        except json.JSONDecodeError:
+            return
+
         op = text_data.get('op')
         data = text_data.get('data')
-        if op == 'stdin':
-            self.stream.write_stdin(data)
-        elif op == 'resize':
-            rows = data.get("cols")
-            cols = data.get("rows")
-            self.stream.write_channel(4, json.dumps({"Height": int(rows), "Width": int(cols)}))
+        if op == 'stdin' and data:
+            try:
+                self.stream.write_stdin(data)
+            except Exception:
+                pass
+        elif op == 'resize' and isinstance(data, dict):
+            try:
+                rows = data.get("rows")
+                cols = data.get("cols")
+                if rows and cols:
+                    self.stream.write_channel(
+                        4, json.dumps({"Height": int(rows), "Width": int(cols)})
+                    )
+            except Exception:
+                pass

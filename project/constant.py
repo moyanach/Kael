@@ -9,8 +9,8 @@ lang_choice = [
 
 
 app_type_choice = [
-    ('phyiscs', '物理应用'),
-    ('virtural', '虚拟应用')
+    ('physical', '物理应用'),
+    ('virtual', '虚拟应用')
 ]
 
 
@@ -34,7 +34,7 @@ app_cost_choice = [
 ]
 
 
-plaform_type = [
+platform_type = [
     ('zhengfu', '政府服务平台'),
     ('qiye', '企业服务平台'),
     ('kaifa', '开发者服务平台'),

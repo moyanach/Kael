@@ -16,7 +16,7 @@ class EnvConfig:
     SENTRY_PASSWORD = os.getenv('SENTRY_PASSWORD', '')
     REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
     SERVICE_NAME = os.getenv('SERVICE_NAME', '')
-    REDIS_DB = os.getenv('REDIS_DB', 0)
+    REDIS_DB = int(os.getenv('REDIS_DB', 0))
 
     MYSQL_HOST = os.getenv('MYSQL_HOST', '')
     MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
@@ -25,6 +25,14 @@ class EnvConfig:
     MYSQL_DB = os.getenv('MYSQL_DB', '')
 
     CMDB_DOMAIN = os.getenv('CMDB_DOMAIN', '')
+    CMDB_TOKEN = os.getenv('CMDB_TOKEN', '')
+
+    # K8s credentials (moved from hardcoded webshell/utils.py)
+    K8S_HOST = os.getenv('K8S_HOST', '')
+    K8S_ADMIN_TOKEN = os.getenv('K8S_ADMIN_TOKEN', '')
+    K8S_TOKEN = os.getenv('K8S_TOKEN', '')
+    K8S_TOKEN_READ = os.getenv('K8S_TOKEN_READ', '')
+    K8S_VERIFY_SSL = os.getenv('K8S_VERIFY_SSL', 'true').lower() == 'true'
 
 
 config = EnvConfig()
