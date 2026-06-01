@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "channels",
+    "rest_framework",
+    "drf_spectacular",
     "project",
     "users",
     "order",
@@ -139,3 +141,24 @@ USE_TZ = False
 
 
 STATIC_URL = "/static/"
+
+# DRF configuration
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "utils.pagination.StandardPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+# drf-spectacular API schema settings
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Kael CMDB API",
+    "DESCRIPTION": "CMDB management system API documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

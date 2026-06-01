@@ -2,10 +2,11 @@ from django.db import models
 
 from users.models import UsersModel
 from project.constant import *
+from utils.common import CommonFields
 from utils.tools import generate_instance_id
 
 
-class BusinessesModel(models.Model):
+class BusinessesModel(CommonFields):
     instance = models.CharField(
         max_length=64,
         verbose_name="实例ID",
@@ -15,17 +16,11 @@ class BusinessesModel(models.Model):
     )
     name = models.CharField(max_length=32, verbose_name="业务线名称")
     label = models.CharField(max_length=32, verbose_name="业务线别名")
-    platform = models.CharField(
-        max_length=32, verbose_name="业务线平台", choices=platform_type
-    )
-    description = models.CharField(
-        max_length=255, verbose_name="业务线描述", default=""
-    )
+    platform = models.CharField(max_length=32, verbose_name="业务线平台", choices=platform_type)
+    description = models.CharField(max_length=255, verbose_name="业务线描述", default="")
     create_user = models.CharField(max_length=64, verbose_name="创建人", default="")
-    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    update_time = models.DateTimeField(verbose_name="修改时间", auto_now=True)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "apps_business"
 
     def __str__(self) -> str:
@@ -51,17 +46,15 @@ class ProductsModel(models.Model):
         verbose_name="业务线ID",
     )
     create_user = models.CharField(max_length=64, verbose_name="创建人", default="")
-    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    update_time = models.DateTimeField(verbose_name="修改时间", auto_now=True)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "apps_product"
 
     def __str__(self) -> str:
         return self.name
 
 
-class ApplicationModel(models.Model):
+class ApplicationModel(CommonFields):
     instance = models.CharField(
         max_length=64,
         verbose_name="实例ID",
@@ -71,22 +64,12 @@ class ApplicationModel(models.Model):
     )
     name = models.CharField(max_length=64, verbose_name="应用名")
     lang = models.CharField(verbose_name="语言", max_length=18, choices=lang_choice)
-    level = models.CharField(
-        verbose_name="应用等级", max_length=8, choices=app_level_choice
-    )
-    mold = models.CharField(
-        verbose_name="应用类型", max_length=18, choices=app_type_choice
-    )
-    cost_mode = models.CharField(
-        verbose_name="成本模型", max_length=18, choices=app_cost_choice
-    )
-    is_docker = models.CharField(
-        verbose_name="容器应用", max_length=18, choices=docker_type_choice
-    )
+    level = models.CharField(verbose_name="应用等级", max_length=8, choices=app_level_choice)
+    mold = models.CharField(verbose_name="应用类型", max_length=18, choices=app_type_choice)
+    cost_mode = models.CharField(verbose_name="成本模型", max_length=18, choices=app_cost_choice)
+    is_docker = models.CharField(verbose_name="容器应用", max_length=18, choices=docker_type_choice)
     health = models.JSONField(verbose_name="巡检健康度信息", null=True, default={})
-    handle_info = models.CharField(
-        verbose_name="服务健康度处理意见", max_length=300, null=True, default=""
-    )
+    handle_info = models.CharField(verbose_name="服务健康度处理意见", max_length=300, null=True, default="")
     description = models.CharField(verbose_name="备注信息", max_length=255, default="")
     # 用户删除，允许owner为空， 必须有补偿机制确保该字段及时有值
     owner = models.ForeignKey(
@@ -112,11 +95,8 @@ class ApplicationModel(models.Model):
         to_field="instance",
         null=True,
     )
-    create_user = models.CharField(max_length=64, verbose_name="创建人", default="")
-    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
-    update_time = models.DateTimeField(verbose_name="修改时间", auto_now=True)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "apps_application"
 
     def __str__(self) -> str:

@@ -1,9 +1,24 @@
 from django.urls import path, include
-
-from project.urls import urlpatterns as project
-from users.urls import urlpatterns as users
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 urlpatterns = [
-    path("project/", include((project, "project"), namespace="project")),
-    path("users/", include((users, "users"), namespace="users")),
+    # API Schema & Documentation
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+    # App routes
+    path("project/", include(("project.urls", "project"), namespace="project")),
+    path("users/", include(("users.urls", "users"), namespace="users")),
 ]

@@ -1,103 +1,98 @@
 # Create your views here.
-import json
+from rest_framework import viewsets, mixins, status
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 
-from django.views.generic.list import BaseListView
-from django.views.generic.base import View
-from django.http.response import JsonResponse
-
-from project.models import ApplicationModel
-from utils.jsonresponse import JsonResponseExtra
-
-
-__all__ = ('ProjectView', 'ProjectCreateView')
-
-
-class ProjectView(BaseListView):
-    """List applications with pagination."""
-
-    model = ApplicationModel
-    queryset = ApplicationModel.objects.all()
-    paginate_by = 10
-
-    def get_paginate_by(self, queryset):
-        try:
-            return int(self.request.GET.get('size', 10))
-        except (ValueError, TypeError):
-            return 10
-
-    def render_to_response(self, context):
-        results = {'code': 200, 'msg': 'success', "data": [], 'total': 0}
-        page = context.get('object_list', [])
-        # Use proper model serialization instead of Django's serializer
-        results['data'] = [
-            {
-                'instance': obj.instance,
-                'name': obj.name,
-                'lang': obj.lang,
-                'level': obj.level,
-                'mold': obj.mold,
-                'cost_mode': obj.cost_mode,
-                'is_docker': obj.is_docker,
-                'health': obj.health,
-                'handle_info': obj.handle_info,
-                'description': obj.description,
-                'owner_id': obj.owner_id,
-                'business_id': obj.business_id,
-                'product_id': obj.product_id,
-                'create_user': obj.create_user,
-                'create_time': str(obj.create_time) if obj.create_time else None,
-                'update_time': str(obj.update_time) if obj.update_time else None,
-            }
-            for obj in page
-        ]
-        results['total'] = self.get_queryset().count()
-        if context.get('page_obj'):
-            results['total'] = context['page_obj'].paginator.count
-        return JsonResponseExtra(data=results)
+from project.models import BusinessesModel, ProductsModel, ApplicationModel
+from project.serializers import (
+    BusinessesSerializer,
+    ProductsSerializer,
+    ApplicationSerializer,
+    ApplicationCreateSerializer,
+)
 
 
-class ProjectCreateView(View):
-    """Create a new application. Only allowed fields are accepted."""
+class BusinessesViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """业务线管理"""
 
-    # Whitelist of fields that can be set via API (prevents mass assignment)
-    ALLOWED_FIELDS = {
-        'name', 'lang', 'level', 'mold', 'cost_mode',
-        'is_docker', 'health', 'handle_info', 'description',
-        'owner_id', 'business_id', 'product_id',
-    }
+    queryset = BusinessesModel.objects.all()
+    serializer_class = BusinessesSerializer
+    lookup_field = "instance"
+    search_fields = ["name", "label", "platform"]
+    ordering_fields = ["create_at", "name"]
 
-    def post(self, request):
-        try:
-            data = json.loads(request.body)
-        except (json.JSONDecodeError, ValueError):
-            return JsonResponse(
-                data={'code': 400, 'msg': 'Invalid JSON body', 'data': None},
-                status=400
-            )
+    def get_queryset(self):
+        qs = BusinessesModel.objects.all()
+        name = self.request.query_params.get("name")
+        if name:
+            qs = qs.filter(name__icontains=name)
+        return qs
 
-        # Filter to only allowed fields (mass assignment protection)
-        filtered_data = {k: v for k, v in data.items() if k in self.ALLOWED_FIELDS}
 
-        # Require name field
-        if not filtered_data.get('name'):
-            return JsonResponse(
-                data={'code': 400, 'msg': 'name is required', 'data': None},
-                status=400
-            )
+class ProductsViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """产品线管理"""
 
-        try:
-            application_obj = ApplicationModel(**filtered_data)
-            application_obj.full_clean()
-            application_obj.save()
-            results = {
-                'code': 200,
-                'msg': 'success',
-                'data': {'instance': application_obj.instance},
-            }
-        except Exception as err:
-            return JsonResponse(
-                data={'code': 400, 'msg': str(err), 'data': None},
-                status=400
-            )
+    queryset = ProductsModel.objects.all()
+    serializer_class = ProductsSerializer
+    lookup_field = "instance"
+    search_fields = ["name", "label"]
+    ordering_fields = ["create_at", "name"]
 
-        return JsonResponseExtra(data=results)
+    def get_queryset(self):
+        qs = ProductsModel.objects.select_related("business")
+        business = self.request.query_params.get("business")
+        if business:
+            qs = qs.filter(business__instance=business)
+        name = self.request.query_params.get("name")
+        if name:
+            qs = qs.filter(name__icontains=name)
+        return qs
+
+
+class ApplicationViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    """应用管理"""
+
+    queryset = ApplicationModel.objects.select_related(
+        "owner", "business", "product"
+    ).all()
+    lookup_field = "instance"
+    search_fields = ["name", "lang", "level", "mold"]
+    ordering_fields = ["create_at", "name"]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ApplicationCreateSerializer
+        return ApplicationSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        name = self.request.query_params.get("name")
+        if name:
+            qs = qs.filter(name__icontains=name)
+        business = self.request.query_params.get("business")
+        if business:
+            qs = qs.filter(business__instance=business)
+        product = self.request.query_params.get("product")
+        if product:
+            qs = qs.filter(product__instance=product)
+        lang = self.request.query_params.get("lang")
+        if lang:
+            qs = qs.filter(lang=lang)
+        return qs
