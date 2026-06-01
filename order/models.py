@@ -11,7 +11,7 @@ class OrderFormModel(CommonFields):
     sort = models.IntegerField(verbose_name="排序", default=1)
     options = models.JSONField(verbose_name="字段可选项", default=dict)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_form"
 
 
@@ -21,16 +21,14 @@ class OrderApprovalModel(CommonFields):
     sort = models.IntegerField(verbose_name="排序", default=1)
     options = models.JSONField(verbose_name="字段可选项", default=dict)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_approval"
 
 
 class OrderTemplateModel(CommonFields):
     name = models.CharField(max_length=32, verbose_name="名称", unique=True)
     code = models.CharField(max_length=32, verbose_name="英文标识")
-    resource_type = models.CharField(
-        max_length=32, verbose_name="工单资源类型", choices=[]
-    )
+    resource_type = models.CharField(max_length=32, verbose_name="工单资源类型", choices=[])
     icon = models.CharField(max_length=32, verbose_name="图标")
     # Fixed: was duplicate field name 'form' — now properly named
     form = models.ForeignKey(
@@ -49,7 +47,7 @@ class OrderTemplateModel(CommonFields):
     )
     desc = models.CharField(max_length=255, verbose_name="描述", default="")
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_template"
 
 
@@ -60,15 +58,13 @@ class OrderInstaceModel(CommonFields):
     order_type = models.CharField(max_length=32, verbose_name="工单类型")
     order_status = models.CharField(max_length=32, verbose_name="工单状态", choices=[])
     currrent_node = models.CharField(max_length=32, verbose_name="当前节点")
-    description = models.CharField(
-        max_length=255, verbose_name="业务线描述", default=""
-    )
+    description = models.CharField(max_length=255, verbose_name="业务线描述", default="")
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_instance"
 
 
-class OrderInstaceFormModel(models.Model):
+class OrderInstaceFormModel(CommonFields):
     instance_form = models.ForeignKey(
         OrderInstaceModel,
         on_delete=models.CASCADE,
@@ -84,7 +80,7 @@ class OrderInstaceFormModel(models.Model):
     options = models.JSONField(verbose_name="字段可选项", default=dict)
     create_at = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_instance_form"
 
 
@@ -107,7 +103,7 @@ class OrderInstaceApprovalModel(CommonFields):
     options = models.JSONField(verbose_name="字段可选项", default=dict)
     create_at = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
-    class Meta:
+    class Meta(CommonFields.Meta):
         db_table = "order_instance_approval"
 
 
