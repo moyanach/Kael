@@ -1,9 +1,25 @@
+# IDE
 .vscode
 .settings
+
+# Env & secrets
 .env
 db.sqlite3
+
+# Python
 __pycache__
 *.pyc
+*.pyo
+*.egg-info
+dist/
+build/
+
+# Django
 migrations
+
+# UV / venv
 .venv
+.python-version
+
+# Workbuddy
 .workbuddy/
