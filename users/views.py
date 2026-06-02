@@ -1,22 +1,13 @@
-from rest_framework import serializers, viewsets, mixins, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 
 from users.models import UsersModel
+from users.serializers import UsersSerializer, LoginSerializer
 
 
-class UsersSerializer(serializers.ModelSerializer):
-    """用户序列化器"""
-
-    class Meta:
-        model = UsersModel
-        fields = [
-            "instance", "username", "nickname", "name",
-            "email", "phone", "sex",
-        ]
-        read_only_fields = ["instance"]
 
 
 class UsersViewSet(
@@ -42,12 +33,6 @@ class UsersViewSet(
             qs = qs.filter(name__icontains=name)
         return qs
 
-
-class LoginSerializer(serializers.Serializer):
-    """登录序列化器"""
-
-    username = serializers.CharField(required=True)
-    password = serializers.CharField(required=True, write_only=True)
 
 
 class AuthViewSet(viewsets.GenericViewSet):
