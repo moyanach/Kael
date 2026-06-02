@@ -19,6 +19,6 @@ urlpatterns = [
         name="redoc",
     ),
     # App routes
-    path("project/", include(("project.urls", "project"), namespace="project")),
-    path("users/", include(("users.urls", "users"), namespace="users")),
+    path("api/project/v1/", include(("project.urls", "project"), namespace="project")),
+    path("api/users/v1/", include(("users.urls", "users"), namespace="users")),
 ]

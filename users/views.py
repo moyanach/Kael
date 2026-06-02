@@ -2,12 +2,12 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from users.models import UsersModel
 from users.serializers import UsersSerializer, LoginSerializer
-
-
 
 
 class UsersViewSet(
@@ -34,13 +34,14 @@ class UsersViewSet(
         return qs
 
 
-
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class AuthViewSet(viewsets.GenericViewSet):
     """认证相关接口"""
 
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
-    @action(detail=False, methods=["post"], serializer_class=LoginSerializer)
+    @action(detail=False, methods=["post"])
     def login(self, request):
         """用户登录"""
         serializer = self.get_serializer(data=request.data)
@@ -55,6 +56,9 @@ class AuthViewSet(viewsets.GenericViewSet):
                 {"code": 401, "msg": "Invalid credentials", "data": None},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
+        # Log the user in to establish the session for SessionAuthentication
+        login(request, user)
 
         return Response(
             {
