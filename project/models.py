@@ -68,7 +68,7 @@ class ApplicationModel(CommonFields):
     mold = models.CharField(verbose_name="应用类型", max_length=18, choices=app_type_choice)
     cost_mode = models.CharField(verbose_name="成本模型", max_length=18, choices=app_cost_choice)
     is_docker = models.CharField(verbose_name="容器应用", max_length=18, choices=docker_type_choice)
-    health = models.JSONField(verbose_name="巡检健康度信息", null=True, default={})
+    health = models.JSONField(verbose_name="巡检健康度信息", null=True, default=dict)
     handle_info = models.CharField(verbose_name="服务健康度处理意见", max_length=300, null=True, default="")
     description = models.CharField(verbose_name="备注信息", max_length=255, default="")
     # 用户删除，允许owner为空， 必须有补偿机制确保该字段及时有值

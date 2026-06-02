@@ -68,12 +68,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "HOST": config.MYSQL_HOST,
-        "PORT": config.MYSQL_PORT,
-        "NAME": config.MYSQL_DB,
-        "USER": config.MYSQL_USER,
-        "PASSWORD": config.MYSQL_PWD,
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -134,8 +130,6 @@ LANGUAGE_CODE = "zh-hans"
 TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = False
 

@@ -18,12 +18,6 @@ class EnvConfig:
     SERVICE_NAME = os.getenv('SERVICE_NAME', '')
     REDIS_DB = int(os.getenv('REDIS_DB', 0))
 
-    MYSQL_HOST = os.getenv('MYSQL_HOST', '')
-    MYSQL_PORT = int(os.getenv('MYSQL_PORT', 3306))
-    MYSQL_USER = os.getenv('MYSQL_USER', '')
-    MYSQL_PWD = os.getenv('MYSQL_PWD', '')
-    MYSQL_DB = os.getenv('MYSQL_DB', '')
-
     CMDB_DOMAIN = os.getenv('CMDB_DOMAIN', '')
     CMDB_TOKEN = os.getenv('CMDB_TOKEN', '')
 
