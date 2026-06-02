@@ -27,7 +27,7 @@ class BusinessesModel(CommonFields):
         return self.name
 
 
-class ProductsModel(models.Model):
+class ProductsModel(CommonFields):
     instance = models.CharField(
         max_length=64,
         verbose_name="实例ID",
