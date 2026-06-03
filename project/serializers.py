@@ -9,10 +9,16 @@ class BusinessesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessesModel
         fields = [
-            "instance", "name", "label", "platform", "description",
-            "create_user", "create_at", "update_at",
+            "instance",
+            "name",
+            "label",
+            "platform",
+            "description",
+            "create_by",
+            "create_at",
+            "update_at",
         ]
-        read_only_fields = ["instance", "create_at", "update_at"]
+        read_only_fields = ["instance", "create_by", "create_at", "update_at"]
 
 
 class ProductsSerializer(serializers.ModelSerializer):
@@ -24,11 +30,18 @@ class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductsModel
         fields = [
-            "instance", "name", "label", "description",
-            "business", "business_name", "business_label",
-            "create_user", "create_at", "update_at",
+            "instance",
+            "name",
+            "label",
+            "description",
+            "business",
+            "business_name",
+            "business_label",
+            "create_by",
+            "create_at",
+            "update_at",
         ]
-        read_only_fields = ["instance", "create_at", "update_at"]
+        read_only_fields = ["instance", "create_by", "create_at", "update_at"]
 
     def to_internal_value(self, data):
         # Support business lookup by instance ID
@@ -54,16 +67,35 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApplicationModel
         fields = [
-            "instance", "name", "lang", "lang_display",
-            "level", "level_display", "mold", "mold_display",
-            "cost_mode", "cost_mode_display", "is_docker", "is_docker_display",
-            "health", "handle_info", "description",
-            "owner", "owner_username", "owner_nickname",
-            "business", "business_name", "business_label",
-            "product", "product_name", "product_label",
-            "create_at", "update_at",
+            "instance",
+            "name",
+            "lang",
+            "lang_display",
+            "level",
+            "level_display",
+            "mold",
+            "mold_display",
+            "cost_mode",
+            "cost_mode_display",
+            "is_docker",
+            "is_docker_display",
+            "health",
+            "handle_info",
+            "description",
+            "owner",
+            "owner_username",
+            "owner_nickname",
+            "business",
+            "business_name",
+            "business_label",
+            "product",
+            "product_name",
+            "product_label",
+            "create_by",
+            "create_at",
+            "update_at",
         ]
-        read_only_fields = ["instance", "create_at", "update_at"]
+        read_only_fields = ["instance", "create_by", "create_at", "update_at"]
 
 
 class ApplicationCreateSerializer(serializers.ModelSerializer):
@@ -72,9 +104,18 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApplicationModel
         fields = [
-            "name", "lang", "level", "mold", "cost_mode",
-            "is_docker", "health", "handle_info", "description",
-            "owner", "business", "product",
+            "name",
+            "lang",
+            "level",
+            "mold",
+            "cost_mode",
+            "is_docker",
+            "health",
+            "handle_info",
+            "description",
+            "owner",
+            "business",
+            "product",
         ]
 
     def create(self, validated_data):

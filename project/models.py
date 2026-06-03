@@ -18,7 +18,6 @@ class BusinessesModel(CommonFields):
     label = models.CharField(max_length=32, verbose_name="业务线别名")
     platform = models.CharField(max_length=32, verbose_name="业务线平台", choices=platform_type)
     description = models.CharField(max_length=255, verbose_name="业务线描述", default="")
-    create_user = models.CharField(max_length=64, verbose_name="创建人", default="")
 
     class Meta(CommonFields.Meta):
         db_table = "apps_business"
@@ -45,7 +44,6 @@ class ProductsModel(CommonFields):
         related_name="business_product",
         verbose_name="业务线ID",
     )
-    create_user = models.CharField(max_length=64, verbose_name="创建人", default="")
 
     class Meta(CommonFields.Meta):
         db_table = "apps_product"
