@@ -8,12 +8,12 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Load from environment variable; fallback only for local development.
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure--CHANGE_ME-IN-PRODUCTION--73hy!ksrvt0mp010hj')
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure--CHANGE_ME-IN-PRODUCTION--73hy!ksrvt0mp010hj")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -39,6 +39,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "utils.common.GlobalUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -79,10 +80,10 @@ CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": [
-            f"redis://{item.split(':')[0]}:{item.split(':')[1]}"
-            for item in config.SENTRY_HOST.split(",")
-            if item
-        ] if config.SENTRY_HOST else f"redis://127.0.0.1:6379/{config.REDIS_DB}",
+            f"redis://{item.split(':')[0]}:{item.split(':')[1]}" for item in config.SENTRY_HOST.split(",") if item
+        ]
+        if config.SENTRY_HOST
+        else f"redis://127.0.0.1:6379/{config.REDIS_DB}",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.SentinelClient",
             "CONNECTION_FACTORY": "django_redis.pool.SentinelConnectionFactory",
@@ -92,10 +93,10 @@ CACHES = {
                 "service_name": config.SERVICE_NAME,
             },
             "SENTINELS": [
-                (item.split(":")[0], int(item.split(":")[1]))
-                for item in config.SENTRY_HOST.split(",")
-                if item
-            ] if config.SENTRY_HOST else [],
+                (item.split(":")[0], int(item.split(":")[1])) for item in config.SENTRY_HOST.split(",") if item
+            ]
+            if config.SENTRY_HOST
+            else [],
             "SENTINEL_KWARGS": {"password": config.SENTRY_PASSWORD},
             "PASSWORD": config.REDIS_PASSWORD,
         },
@@ -164,7 +165,4 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True  # For dev environments. In production, configure CORS_ALLOWED_ORIGINS.
 
 # Trust the frontend origins for CSRF validation (Django 4.0+)
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000'
-).split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",")
