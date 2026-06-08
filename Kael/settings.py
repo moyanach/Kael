@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "users",
     "order",
     "webshell",
+    "audit",  # 操作审计
 ]
 
 MIDDLEWARE = [

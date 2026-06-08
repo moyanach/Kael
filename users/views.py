@@ -8,6 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 from users.models import UsersModel
 from users.serializers import UsersSerializer, LoginSerializer
+from audit.utils import write_audit_log
 
 
 class UsersViewSet(
@@ -52,6 +53,14 @@ class AuthViewSet(viewsets.GenericViewSet):
 
         user = authenticate(request, username=username, password=password)
         if user is None:
+            # 记录失败登录
+            write_audit_log(
+                action="login",
+                resource_type="User",
+                resource_name=username,
+                detail=f"用户 {username} 登录失败：密码错误或用户不存在",
+                operator=username,
+            )
             return Response(
                 {"code": 401, "msg": "Invalid credentials", "data": None},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -59,6 +68,15 @@ class AuthViewSet(viewsets.GenericViewSet):
 
         # Log the user in to establish the session for SessionAuthentication
         login(request, user)
+
+        # 记录成功登录
+        write_audit_log(
+            action="login",
+            resource_type="User",
+            resource_instance=str(user.pk),
+            resource_name=user.username,
+            detail=f"用户 {user.username} 登录成功",
+        )
 
         return Response(
             {

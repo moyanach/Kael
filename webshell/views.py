@@ -1,4 +1,3 @@
-
 # Create your views here.
 import json
 
@@ -7,6 +6,7 @@ from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 
 from webshell.utils import K8SStreamThread, K8SApiTools
+from audit.utils import write_audit_log
 
 
 class SSHConsumer(WebsocketConsumer):
@@ -36,6 +36,10 @@ class SSHConsumer(WebsocketConsumer):
         #     self.close(code=4003)
         #     return
 
+        # 获取当前用户
+        user = self.scope.get("user", None)
+        username = user.username if user and user.is_authenticated else "anonymous"
+
         try:
             # Create K8s exec stream with dynamic pod params
             k8s_tools = K8SApiTools(rw=True)
@@ -47,7 +51,25 @@ class SSHConsumer(WebsocketConsumer):
             kub_stream = K8SStreamThread(self, self.stream)
             kub_stream.start()
             self.accept()
+
+            # 记录 Webshell 连接审计
+            write_audit_log(
+                action="connect",
+                resource_type="K8sPod",
+                resource_name=f"{self.namespace}/{self.pod_name}",
+                resource_instance=self.pod_name,
+                detail=f"用户 {username} 通过 Webshell 连接到 {self.namespace}/{self.pod_name} 容器 {self.container or self.pod_name}",
+                operator=username,
+            )
         except Exception as err:
+            # 记录连接失败审计
+            write_audit_log(
+                action="connect",
+                resource_type="K8sPod",
+                resource_name=f"{self.namespace}/{self.pod_name}",
+                detail=f"用户 {username} 连接 {self.namespace}/{self.pod_name} 失败: {err}",
+                operator=username,
+            )
             self.close(code=4002)
 
     def disconnect(self, close_code):

@@ -12,6 +12,7 @@ django.setup()
 
 from utils.sync import SyncBaseInfo  # noqa
 from users.models import UsersModel  # noqa
+from audit.utils import write_audit_log  # noqa
 
 
 class SyncUserInfo(SyncBaseInfo):
@@ -72,6 +73,14 @@ class SyncUserInfo(SyncBaseInfo):
                 print(f"Error saving user {item.get('instance', 'unknown')}: {err}")
 
         print(f"User sync complete: {saved_count} created/updated, {error_count} errors")
+        # 记录同步审计
+        write_audit_log(
+            action="sync",
+            resource_type="UsersModel",
+            resource_name="user_sync",
+            detail=f"用户数据同步完成：新增/更新 {saved_count} 条，失败 {error_count} 条",
+            operator="system",
+        )
 
 
 if __name__ == "__main__":

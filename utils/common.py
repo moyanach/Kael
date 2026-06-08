@@ -5,6 +5,8 @@ from django.dispatch import receiver
 
 # Async-safe context variable to store the current request user
 _current_user = contextvars.ContextVar("current_user", default=None)
+# Async-safe context variable to store the current request object
+_current_request = contextvars.ContextVar("current_request", default=None)
 
 
 def get_current_user():
@@ -15,6 +17,16 @@ def get_current_user():
 def set_current_user(user):
     """Set the current user in context."""
     return _current_user.set(user)
+
+
+def get_current_request():
+    """Retrieve the current request object from context."""
+    return _current_request.get()
+
+
+def set_current_request(request):
+    """Set the current request in context."""
+    return _current_request.set(request)
 
 
 class GlobalUserMiddleware:
@@ -28,11 +40,13 @@ class GlobalUserMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
-        token = set_current_user(user)
+        token_user = set_current_user(user)
+        token_request = set_current_request(request)
         try:
             response = self.get_response(request)
         finally:
-            _current_user.reset(token)
+            _current_user.reset(token_user)
+            _current_request.reset(token_request)
         return response
 
 
@@ -68,4 +82,3 @@ def auto_populate_audit_fields(sender, instance, **kwargs):
     # Set create_user if present and empty
     if hasattr(instance, "create_user") and not getattr(instance, "create_user"):
         instance.create_user = username
-

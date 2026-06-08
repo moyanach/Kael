@@ -21,4 +21,5 @@ urlpatterns = [
     # App routes
     path("api/project/v1/", include(("project.urls", "project"), namespace="project")),
     path("api/users/v1/", include(("users.urls", "users"), namespace="users")),
+    path("api/audit/v1/", include(("audit.urls", "audit"), namespace="audit")),
 ]

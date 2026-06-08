@@ -14,6 +14,7 @@ from utils.sync import SyncBaseInfo  # noqa
 from users.models import UsersModel  # noqa
 from project.models import BusinessesModel, ProductsModel, ApplicationModel  # noqa
 from project.constant import app_type_choice, lang_choice, app_level_choice, docker_type_choice  # noqa
+from audit.utils import write_audit_log  # noqa
 
 
 class ProjectSyncData(SyncBaseInfo):
@@ -115,6 +116,14 @@ class ProjectSyncData(SyncBaseInfo):
                 print(f"Error saving business {item.get('instance', 'unknown')}: {err}")
 
         print(f"Business sync complete: {saved_count} created/updated, {error_count} errors")
+        # 记录同步审计
+        write_audit_log(
+            action="sync",
+            resource_type="BusinessesModel",
+            resource_name="business_sync",
+            detail=f"业务线数据同步完成：新增/更新 {saved_count} 条，失败 {error_count} 条",
+            operator="system",
+        )
 
     def save_product(self):
         """Sync and save product records. Combined validation + save in one loop."""
@@ -150,6 +159,14 @@ class ProjectSyncData(SyncBaseInfo):
                 print(f"Error saving product {item.get('instance', 'unknown')}: {err}")
 
         print(f"Product sync complete: {saved_count} created/updated, {error_count} errors")
+        # 记录同步审计
+        write_audit_log(
+            action="sync",
+            resource_type="ProductsModel",
+            resource_name="product_sync",
+            detail=f"产品线数据同步完成：新增/更新 {saved_count} 条，失败 {error_count} 条",
+            operator="system",
+        )
 
     def save_application(self):
         """Sync and save application records. Combined validation + save in one loop."""
@@ -202,6 +219,14 @@ class ProjectSyncData(SyncBaseInfo):
                 print(f"Error saving application {item.get('instance', 'unknown')}: {err}")
 
         print(f"Application sync complete: {saved_count} created/updated, {error_count} errors")
+        # 记录同步审计
+        write_audit_log(
+            action="sync",
+            resource_type="ApplicationModel",
+            resource_name="application_sync",
+            detail=f"应用数据同步完成：新增/更新 {saved_count} 条，失败 {error_count} 条",
+            operator="system",
+        )
 
 
 if __name__ == '__main__':
